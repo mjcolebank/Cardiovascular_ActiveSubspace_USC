@@ -62,7 +62,7 @@ AS_LB = AS_min.*ones(num_act_variables,1);
 AS_UB = AS_max.*ones(num_act_variables,1);
 
 for i=1:num_init
-    alpha0 = alpha%*unifrnd(0.5,1.5,num_act_variables,1); % Perturb initial value
+    alpha0 = alpha*unifrnd(0.5,1.5,num_act_variables,1); % Perturb initial value
     disp([i,alpha0])
     [xmin,fval,exitflag,output,lambda,grad,hessian] = fmincon(J,alpha0,[],[],[],[],AS_min,AS_max,[],options);
 
