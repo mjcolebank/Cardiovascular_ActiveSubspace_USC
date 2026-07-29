@@ -130,37 +130,7 @@ Rp         = (ppa_mean-ppv_mean)/CO; % Resistance of the pulmonary capillaries
 Rpv        = (ppv_mean-pla_min)/CO; % Resistance of the pulmonary veins
 
 
-PH_factor = 1.0; % This scales the pulmonary pressures to increase resistance
-prv_max = prv_max*PH_factor; ppa_mean = ppa_mean*PH_factor; ppv_mean = ppv_mean*PH_factor;
-
-%%
-% Assume radius is similar to Poiseuille, except use:
-% R = 8 mu L / pi r^4 ~ 8 mu/ pi r^3
-% NOTE: this is not an ideal law; the resistance shrinks quickly for larger
-% VSD radii. This may be more data driven
-
-
-mu = 2.4002e-04; %Blood density in mmHg * s
-rho = 1.055; % 1.35951 g/cm s^2 = 1 mmHg
-if isempty(VSD_rad) || VSD_rad==0
-    Rvsd = 1e10; %No opening
-else
-
-    %% Orifice flow argument
-    Cd = 1e0;
-    Kvsd = Cd*pi.*(VSD_rad.^2)*sqrt(2.*1333.22/rho); % last term is conversion factor
-    % note: rho = g/cm^3, p = mmHg = 1.35951 g/cm s^2, so
-    % sqrt(p/rho) = sqrt(g/cm s^2 * cm^3 / g) = sqrt(cm^2 / s^2) = cm/s
-    % and pi *r^2 = cm^2, so kvsd*sqrt(p) = cm^3/s = mL/s
-    % From Burkhoff paper
-    %         Kvsd = 9.4540e-02*VSD_rad.^2;
-    %         Kvsd = 9.4540e-02*VSD_rad.^2;
-    %           Kvsd = 1*(pi.*VSD_rad.^2).*sqrt(2.*rho)./sqrt(1-0.9^4);
-    % We want resistance for consistency
-    Rvsd = 1./Kvsd;
-end
-
-Rpars = [Rmval;Raval;Rtval;Rpval;Rs;Rvc;Rp;Rpv;Rvsd];
+Rpars = [Rmval;Raval;Rtval;Rpval;Rs;Rvc;Rp;Rpv];
 
 % Csa = Vsa_init/psa_max;  % Systemic arterial compliance
 Csv = Vsv_init/psv_mean;  % Systemic venous compliance

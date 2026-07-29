@@ -6,7 +6,7 @@ HBs = 1;
 sex = 1; %F
 percentile = 50;
 weight = 70;
-
+perturb = 0.5;
 number_of_patients = 10;
 
 % multiarray with volumes, pressures, and flows from each patient
@@ -18,12 +18,12 @@ pars_array = makearray(pars);
 
 % data from patients with randomized parameters
 % normal distribution, mean = nominal value, variance = 5%*mean
-random_patient_parameters = zeros(36,10);
+random_patient_parameters = zeros(34,10);
 
 for i=1:number_of_patients
-    new_pars_array = normrnd(1,0.05)*pars_array;
+    new_pars_array = (1+unifrnd(-perturb,perturb))*pars_array(1:end-1);
     % new_IC = normrnd(1,1.05)*IC;
-    random_patient_parameters(1:36,i) = new_pars_array;
+    random_patient_parameters(:,i) = new_pars_array;
     
     % the time cycle is constant
     pars_struct = makestruct(new_pars_array,1e8,pars.T);
