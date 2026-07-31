@@ -1,6 +1,6 @@
 %% optimizing using the randomized patient data over active variables
 clear; clc; %close all;
-which_patient=10;
+which_patient=2;
 num_init = 10;
 parameterNames = {'Rmval','Raval','Rtval','Rpval','Rs','Rvc','Rp','Rpv' ...
 'Csa','Csv','Cpa','Cpv', ...
@@ -12,22 +12,29 @@ parameterNames = {'Rmval','Raval','Rtval','Rpval','Rs','Rvc','Rp','Rpv' ...
 [IC, pars] = ComputeParameters_adult(70,0.0,1);
 HBs = 1;
 
+
+%% Weights: we can specify how much we would like to weigh parts of
+% the cost functional
+w1 = 1;
+w2 = 1;
+cost_weights = [w1.*ones(8,1);w2.*ones(6,1)];
+%%
+
 % load("active_subspace_eightComp_1000samp.mat");
 % load("AS_MJC.mat")
 load("randomizedPatientData");
-load("AS_MJC.mat","random_parameter_array")
 data = squeeze(patient_group_A(:,:,which_patient));
-[W,lambda] = generate_AS_fromData(data);
+[W,lambda] = generate_AS_fromData(data,cost_weights);
 
 % Choose active subspace dimension k
 k = length(lambda);   % example
 % Compute activity scores
 activity_scores = sum(W(:,1:k).^2 .* lambda(1:k)', 2);
-
-% figure; bar(real(log(activity_scores)));
-figure; bar(activity_scores);
+[who,where] = sort(activity_scores,'descend');
+figure; bar(real(log(activity_scores(where))));
+% figure; bar(activity_scores);
 
 xticks(1:length(lambda));
-xticklabels(parameterNames);
+xticklabels(parameterNames(where));
 grid on
 xtickangle(45);

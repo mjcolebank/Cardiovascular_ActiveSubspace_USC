@@ -5,9 +5,9 @@ which_patient=1;
 % Set the number of initializations for multistart optimization
 num_init = 1;
 % Determine how many subspaces you want to use
-num_act_variables = 1;
+num_act_variables = 4;
 % MAKE SURE TO CHANGE THE FILE SAVE NAME
-fname = "multioptResults_ActSub_patXX_DATEHERE";
+fname = "multioptResults_ActSub_TESTING";
 %%
 [IC, pars] = ComputeParameters_adult(70,0.0,1);
 HBs = 1;
@@ -32,7 +32,7 @@ pars_base = makearray(pars);
 pars_base([end]) = [];
 
 AS_min = -15;
-AS_max = 15;
+AS_max = 5;
 
 
 %% active subspaces
@@ -48,7 +48,7 @@ beta = w_inact'*pars_base;
 
 %%
 options = optimoptions("fmincon","Display","iter-detailed", ...
-    "FiniteDifferenceStepSize",1e-3);
+    "FiniteDifferenceStepSize",1e-2);
 results = zeros(num_act_variables,num_init);
 param_results = zeros(34,num_init); % column i is the inferred parameters for patient i from minimizing cost over the active variables
 costs = zeros(1,num_init);
@@ -62,9 +62,19 @@ AS_LB = AS_min.*ones(num_act_variables,1);
 AS_UB = AS_max.*ones(num_act_variables,1);
 
 for i=1:num_init
-    alpha0 = alpha*unifrnd(0.5,1.5,num_act_variables,1); % Perturb initial value
-    disp([i,alpha0])
-    [xmin,fval,exitflag,output,lambda,grad,hessian] = fmincon(J,alpha0,[],[],[],[],AS_min,AS_max,[],options);
+    alpha0 = alpha.*unifrnd(0.5,1.5,num_act_variables,1); % Perturb initial value
+    if any(alpha0>AS_max)
+        id = find(alpha0>AS_max);
+        alpha0(id) = AS_max*0.999;
+        disp('hit max')
+    end
+    if any(alpha0<AS_min)
+        id = find(alpha0>AS_max);
+        alpha0(id) = AS_min*0.999;
+        disp('hit min')
+    end
+    disp([i;alpha0]')
+    [xmin,fval,exitflag,output,lambda,grad,hessian] = fmincon(J,alpha0,[],[],[],[],AS_LB,AS_UB,[],options);
 
     results(:,i) = xmin;
 
@@ -88,15 +98,12 @@ parameterNames = {'Rmval','Raval','Rtval','Rpval','Rs','Rvc','Rp','Rpv' ...
     'Emax_RA','Emin_RA','Vd_RA','T_peak_RA','T_relax_RA','t_offset_RA', ...
     'Emax_RV','Emin_RV','Vd_RV','T_peak_RV','T_relax_RV'};
 
-param_true = random_patient_parameters([1:8,10:end-1],which_patient);
-rel_par_error_1D = (param_results - param_true)./param_true;
-rel_par_error_2D = (param_results2D - param_true)./param_true;
+param_true = random_patient_parameters(:,which_patient);
+rel_par_error = (param_results - param_true)./param_true;
 figure(100);
-bar([rel_par_error_1D rel_par_error_2D]);
-legend('1D','2D')
+bar(rel_par_error);
 xticks(1:34);
 xticklabels(parameterNames)
 %%
-save(fname,"results","results2D","param_results","param_results2D", ...
-    "alpha","beta","alpha_2D","beta_2D", ...
-    "w_active","w_inact","w_active_2D","w_inact_2D");
+save(fname,"results","param_results",...
+    "alpha","beta","w_active","w_inact");
