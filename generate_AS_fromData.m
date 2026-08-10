@@ -7,9 +7,11 @@
 % Since we typically compute J = sum ((D_i - M_i(theta))/D_i)^2, we can use
 % existing gradients of M to our advantage
 
-function [W,lambda] = generate_AS_fromData(data,cost_weights)
+function [W,lambda] = generate_AS_fromData(data,cost_weights,param_ids)
 load Samples_for_AS.mat grad_evals model_evals random_parameter_array
 %%
+grad_evals = grad_evals(:,param_ids,:);
+random_parameter_array = random_parameter_array(param_ids,:);
 %
 [n_qoi,n_param,n_samp] = size(grad_evals);
 qdata = zeros(14,1);
@@ -51,6 +53,14 @@ for j=1:n_samp
     weights = -2.0.* (cost_weights.*r(:,j)./ qdata);
     grad_J = Glog'*weights;
     C = C + grad_J*grad_J';
+
+    c_temp = grad_J*grad_J';
+    corr_temp = c_temp.*0;
+    for ii=1:n_param
+        for iii=1:n_param
+            corr_temp(ii,iii) = c_temp(ii,iii)./sqrt(c_temp(ii,ii)*c_temp(iii,iii));
+        end
+    end
 end
 C = C./n_samp;
 

@@ -19,22 +19,43 @@ w1 = 1;
 w2 = 1;
 cost_weights = [w1.*ones(8,1);w2.*ones(6,1)];
 %%
+param_ids = 1:34;
+param_remove = [10 11 12 19]; %Consider all compliance parameters (9-12) and emax in the lV (19)
+% Also add dead volumes
+param_remove(end+1:end+4) = [15 21 26 32];
+param_ids(param_remove) = [];
+disp('No longer including these parameters');
+disp(parameterNames(param_remove))
+parameterNames(param_remove) = [];
 
-% load("active_subspace_eightComp_1000samp.mat");
-% load("AS_MJC.mat")
+%%
+
 load("randomizedPatientData");
 data = squeeze(patient_group_A(:,:,which_patient));
-[W,lambda] = generate_AS_fromData(data,cost_weights);
+[W,lambda] = generate_AS_fromData(data,cost_weights,param_ids);
 
 % Choose active subspace dimension k
 k = length(lambda);   % example
 % Compute activity scores
-activity_scores = sum(W(:,1:k).^2 .* lambda(1:k)', 2);
+activity_scores_unnorm = sum(W(:,1:k).^2 .* lambda(1:k)', 2);
+activity_scores = activity_scores_unnorm./sum(lambda);
 [who,where] = sort(activity_scores,'descend');
-figure; bar(real(log(activity_scores(where))));
-% figure; bar(activity_scores);
 
+
+figure; bar(activity_scores(where));
 xticks(1:length(lambda));
 xticklabels(parameterNames(where));
 grid on
 xtickangle(45);
+set(gca,'FontSize',20);
+
+%% Plot eigenvectors corresponding to eigenvalues
+% Want to verify that the dominant eigenvectors are not unit vectors
+figure;
+bar(W(:,1:3));
+xticks(1:length(lambda));
+xticklabels(parameterNames);
+grid on
+xtickangle(45);
+set(gca,'FontSize',20);
+legend('W1','W2','W3')
