@@ -8,7 +8,7 @@
 % existing gradients of M to our advantage
 
 function [W,lambda] = generate_AS_fromData(data,cost_weights,param_ids)
-load Samples_for_AS.mat grad_evals model_evals random_parameter_array
+load Samples_for_AS_NewTiming.mat grad_evals model_evals random_parameter_array
 %%
 grad_evals = grad_evals(:,param_ids,:);
 random_parameter_array = random_parameter_array(param_ids,:);

@@ -6,11 +6,13 @@ function [V,p,q,tplot] = GetModelOutput(IC,pars,HBs)
 tstart = 0;
 tend   = 30*pars.T; % 30 cycles
 tspace = tstart:1e-4:tend;
-options = odeset('RelTol',1e-8,'AbsTol',1e-8); % Necessary for the ODE solver
+options = odeset('RelTol',1e-3,'AbsTol',1e-3); % Necessary for the ODE solver
 
 % Solve the model
 % tic
-sol = ode45(@EightCompModel,[tspace(1) tspace(end)],IC,options,pars);
+% sol = ode45(@EightCompModel,[tspace(1) tspace(end)],IC,options,pars);
+sol = ode23s(@EightCompModel,[tspace(1) tspace(end)],IC,options,pars);
+
 % toc
 % We solved the model for 30 heartbeats; we want to extract the last two
 % for plotting

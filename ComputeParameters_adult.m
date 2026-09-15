@@ -130,6 +130,36 @@ Rp         = (ppa_mean-ppv_mean)/CO; % Resistance of the pulmonary capillaries
 Rpv        = (ppv_mean-pla_min)/CO; % Resistance of the pulmonary veins
 
 
+PH_factor = 1.0; % This scales the pulmonary pressures to increase resistance
+prv_max = prv_max*PH_factor; ppa_mean = ppa_mean*PH_factor; ppv_mean = ppv_mean*PH_factor;
+
+%%
+% Assume radius is similar to Poiseuille, except use:
+% R = 8 mu L / pi r^4 ~ 8 mu/ pi r^3
+% NOTE: this is not an ideal law; the resistance shrinks quickly for larger
+% VSD radii. This may be more data driven
+
+
+mu = 2.4002e-04; %Blood density in mmHg * s
+rho = 1.055; % 1.35951 g/cm s^2 = 1 mmHg
+if isempty(VSD_rad) || VSD_rad==0
+    Rvsd = 1e10; %No opening
+else
+
+    %% Orifice flow argument
+    Cd = 1e0;
+    Kvsd = Cd*pi.*(VSD_rad.^2)*sqrt(2.*1333.22/rho); % last term is conversion factor
+    % note: rho = g/cm^3, p = mmHg = 1.35951 g/cm s^2, so
+    % sqrt(p/rho) = sqrt(g/cm s^2 * cm^3 / g) = sqrt(cm^2 / s^2) = cm/s
+    % and pi *r^2 = cm^2, so kvsd*sqrt(p) = cm^3/s = mL/s
+    % From Burkhoff paper
+    %         Kvsd = 9.4540e-02*VSD_rad.^2;
+    %         Kvsd = 9.4540e-02*VSD_rad.^2;
+    %           Kvsd = 1*(pi.*VSD_rad.^2).*sqrt(2.*rho)./sqrt(1-0.9^4);
+    % We want resistance for consistency
+    Rvsd = 1./Kvsd;
+end
+
 Rpars = [Rmval;Raval;Rtval;Rpval;Rs;Rvc;Rp;Rpv];
 
 % Csa = Vsa_init/psa_max;  % Systemic arterial compliance
@@ -148,32 +178,32 @@ Cpars = [Csa;Csv;Cpa;Cpv];
 % MJC for clarification)
 Emax_LA    = pla_max/min_LA;%Vla_init;
 Emin_LA    = (pla_max+pla_min)/(max_LA+min_LA);
-Vd_LA      = 5;
+Vd_LA      = 0;
 T_peak_LA  = T*0.1;
-T_relax_LA = T*0.20;
+T_relax_LA = T*0.1;
 t_offset   = T*0.15;
 LApars = [Emax_LA;Emin_LA;Vd_LA;T_peak_LA;T_relax_LA; t_offset];
 
 Emax_RA    = pra_max/min_RA;
 Emin_RA    = (pra_max+pra_min)/(max_RA+min_RA);
-Vd_RA      = 5;%5;
+Vd_RA      = 0;%5;
 T_peak_RA  = T*0.1;
-T_relax_RA = T*0.20;
+T_relax_RA = T*0.1;
 t_offset   = T*0.15;
 RApars = [Emax_RA;Emin_RA;Vd_RA;T_peak_RA;T_relax_RA; t_offset];
 
 Emax_LV    = plv_max/Esv_LV;
 Emin_LV    = plv_min/Edv_LV;
-Vd_LV      = 10;%5;
+Vd_LV      = 0;%5;
 T_peak_LV  = T*0.25;
-T_relax_LV = T*0.55;
+T_relax_LV = T*0.30;
 LVpars = [Emax_LV;Emin_LV;Vd_LV;T_peak_LV;T_relax_LV];
 
 Emax_RV    = prv_max/Esv_RV;
 Emin_RV    = prv_min/Edv_RV;
-Vd_RV      = 10;%5;
+Vd_RV      = 0;%5;
 T_peak_RV  = T*0.25;
-T_relax_RV = T*0.55;
+T_relax_RV = T*0.30;
 RVpars = [Emax_RV;Emin_RV;Vd_RV;T_peak_RV;T_relax_RV];
 
 pars.Rpars = Rpars;

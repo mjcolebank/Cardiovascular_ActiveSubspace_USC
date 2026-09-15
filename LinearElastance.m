@@ -29,17 +29,18 @@ t = mod(t,T);
 % Parse associated parameters 
 %parsCell = num2cell(pars);
 [Emax, Emin, Vd, T_peak, T_relax] = pars{:};
-
+T1 = T_peak;
+T2 = T_peak+T_relax;
 % Generate peak and relax elastance
 rho_peak  = pi * t  / T_peak;
-rho_relax = pi * (t - T_peak) / (T_relax - T_peak);
+rho_relax = pi * (t - T_peak) / T_relax;%(T2 - T1);
 
 E_peak  = (Emax - Emin) * (1 - cos(rho_peak )) / 2 + Emin;
 E_relax = (Emax - Emin) * (1 + cos(rho_relax)) / 2 + Emin;
 
 % Conditional indexes
-ind_peak  = t <= T_peak;
-ind_relax = (t > T_peak) & (t <= T_relax);
+ind_peak  = t <= T1;
+ind_relax = (t > T1) & (t <= T2);
 
 % Conditional update
 E = Emin * ones(size(t));           % default

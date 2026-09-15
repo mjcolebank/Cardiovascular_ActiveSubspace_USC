@@ -1,7 +1,7 @@
 %% optimizing using the randomized patient data over active variables
 clear; clc; %close all;
 which_patient=2;
-num_init = 10;
+how_many_eigs = 4;
 parameterNames = {'Rmval','Raval','Rtval','Rpval','Rs','Rvc','Rp','Rpv' ...
 'Csa','Csv','Cpa','Cpv', ...
 'Emax_LA','Emin_LA','Vd_LA','T_peak_LA','T_relax_LA','t_offset_LA', ...
@@ -20,10 +20,12 @@ w2 = 1;
 cost_weights = [w1.*ones(8,1);w2.*ones(6,1)];
 %%
 param_ids = 1:34;
-param_remove = [10 11 12 19]; %Consider all compliance parameters (9-12) and emax in the lV (19)
+param_remove = [9:12];%[9:12];%[10 11 12 19]; %Consider all compliance parameters (9-12) and emax in the lV (19)
+% param_remove = param_ids; param_remove(9:12) = [];
 % Also add dead volumes
 param_remove(end+1:end+4) = [15 21 26 32];
 param_ids(param_remove) = [];
+
 disp('No longer including these parameters');
 disp(parameterNames(param_remove))
 parameterNames(param_remove) = [];
@@ -52,10 +54,17 @@ set(gca,'FontSize',20);
 %% Plot eigenvectors corresponding to eigenvalues
 % Want to verify that the dominant eigenvectors are not unit vectors
 figure;
-bar(W(:,1:3));
+bar(W(:,1:how_many_eigs));
 xticks(1:length(lambda));
 xticklabels(parameterNames);
 grid on
 xtickangle(45);
 set(gca,'FontSize',20);
 legend('W1','W2','W3')
+for i=1:how_many_eigs
+    [who,where] = sort(abs(W(:,i)),'descend');
+    disp('-------------------------------------')
+    disp([parameterNames(where(1:5))])
+    disp([who(1:5)]')
+
+end

@@ -8,17 +8,17 @@ parameterNames = {'Rmval','Raval','Rtval','Rpval','Rs','Rvc','Rp','Rpv' ...
 'Emax_RV','Emin_RV','Vd_RV','T_peak_RV','T_relax_RV'};
 %%
 % Specify which patient to analyze
-which_patient=2;
+which_patient=1;
 % Set the number of initializations for multistart optimization
 num_init = 6;
 % Decide which parameters you are fixing
 param_ids = 1:34;
-param_remove = [10 11 12 19]; %Consider all compliance parameters (9-12) and emax in the lV (19)
+param_remove = [];%[10 11 12 19]; %Consider all compliance parameters (9-12) and emax in the lV (19)
 Vd_remove = [15 21 26 32];
 param_ids([param_remove Vd_remove]) = [];
 
 % Determine how many subspaces you want to use
-num_act_variables = 2;
+num_act_variables = 6;
 % MAKE SURE TO CHANGE THE FILE SAVE NAME
 fname = "multioptResults_ActSub_TESTING_pat2_6init";
 %%
@@ -50,7 +50,7 @@ pars_base = makearray(pars);
 pars_base([end]) = [];
 
 AS_min = -15;
-AS_max = 5;
+AS_max = 15;
 
 new_UB = [UB(param_remove);AS_max.*ones(num_act_variables,1)];
 new_LB = [LB(param_remove);AS_min.*ones(num_act_variables,1)];
@@ -94,7 +94,7 @@ J = @(x) cost_eightCompModel_withSubsets(data,IC,x, ...
 % Initalize and run multiple optimization
 param_init = [pars_base(param_remove);alpha];
 for i=1:num_init
-    param0 = param_init.*unifrnd(0.75,1.25,length(param_init),1); % Perturb initial value
+    param0 = param_init.*unifrnd(0.85,1.15,length(param_init),1); % Perturb initial value
     disp([i;param0]')
     [xmin,fval,exitflag,output,lambda,grad,hessian] = fmincon(J,param0,[],[],[],[],new_LB,new_UB,[],options);
 
