@@ -1,16 +1,16 @@
-function y = cost_eightCompModel_MJC(data,IC,theta_vector,HBs,T,cost_weights,plot_flag)
+function [y,qoi] = cost_eightCompModel_MJC(data,IC,theta_vector,HBs,T,cost_weights,plot_flag)
     % theta adult case for now
     % theta needs to be a vector for the optimizer
     % theta needs to be a structure for the model
     
     %EXPONENTIATE IF LOG_SCALE
-    theta = makestruct(exp(theta_vector),10e8,T);
+    theta = makestruct(exp(theta_vector),T);
 
-    [V,p,q,tplot] = GetModelOutput(IC,theta,HBs); % model output for new parameter set
+    [V,p,q,~] = GetModelOutput(IC,theta,HBs); % model output for new parameter set
     
     % vector for all the quantities of interest with the new parameter set
-     qoi = zeros(14,1);
-    qdata = zeros(14,1);
+     qoi = zeros(16,1);
+    qdata = zeros(16,1);
     
     % maximum and minimum pressure in the systemic arteries
     qoi(1) = max(p.SA); 
@@ -37,29 +37,29 @@ function y = cost_eightCompModel_MJC(data,IC,theta_vector,HBs,T,cost_weights,plo
     qdata(8) = min(data(6,:));
 
     % maximum and minimum volume in the right atrium
-    % qoi(9) = max(V.RA);
-    % qoi(10) = min(V.LA);
-    % qdata(9) = max(data(5,:));
-    % qdata(10) = min(data(5,:));
+    qoi(9) = max(V.RA);
+    qoi(10) = min(V.RA);
+    qdata(9) = max(data(5,:));
+    qdata(10) = min(data(5,:));
 
     % maximum flow rates in the four valves mitral, aortic, tricuspid,
     % pulmonary
-    qoi(9) = max(q.MVal);
-    qoi(10) = max(q.AVal);
-    qoi(11) = max(q.TVal);
-    qoi(12) = max(q.PVal);
-    qdata(9) = max(data(17,:));
-    qdata(10) = max(data(18,:));
-    qdata(11) = max(data(19,:));
-    qdata(12) = max(data(20,:));
+    qoi(11) = max(q.MVal);
+    qoi(12) = max(q.AVal);
+    qoi(13) = max(q.TVal);
+    qoi(14) = max(q.PVal);
+    qdata(11) = max(data(17,:));
+    qdata(12) = max(data(18,:));
+    qdata(13) = max(data(19,:));
+    qdata(14) = max(data(20,:));
 
     % mean right atrial pressure
-    qoi(13) = mean(p.RA);
-    qdata(13) = mean(data(11,:));
+    qoi(15) = mean(p.RA);
+    qdata(15) = mean(data(11,:));
 
     % maximum pulmonary artery pressure
-    qoi(14) = max(p.PA); 
-    qdata(14) = max(data(15,:));
+    qoi(16) = max(p.PA); 
+    qdata(16) = max(data(15,:));
 
     % compute cost (2 norm of the difference of qois from new parameter set
     % and qois from data)

@@ -9,7 +9,7 @@ parameterNames = {'Rmval','Raval','Rtval','Rpval','Rs','Rvc','Rp','Rpv' ...
 'Emax_RA','Emin_RA','Vd_RA','T_peak_RA','T_relax_RA','t_offset_RA', ...
 'Emax_RV','Emin_RV','Vd_RV','T_peak_RV','T_relax_RV'};
 %%
-[IC, pars] = ComputeParameters_adult(70,0.0,1);
+[IC, pars] = ComputeParameters_adult(70,1);
 HBs = 1;
 
 
@@ -17,10 +17,10 @@ HBs = 1;
 % the cost functional
 w1 = 1;
 w2 = 1;
-cost_weights = [w1.*ones(8,1);w2.*ones(6,1)];
+cost_weights = [w1.*ones(10,1);w2.*ones(6,1)];
 %%
 param_ids = 1:34;
-param_remove = [9:12];%[9:12];%[10 11 12 19]; %Consider all compliance parameters (9-12) and emax in the lV (19)
+param_remove = [9 10];%[9:12];%[9:12];%[10 11 12 19]; %Consider all compliance parameters (9-12) and emax in the lV (19)
 % param_remove = param_ids; param_remove(9:12) = [];
 % Also add dead volumes
 param_remove(end+1:end+4) = [15 21 26 32];
